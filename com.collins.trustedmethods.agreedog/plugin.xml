@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.rockwellcollins.atc.agree.analysis.cexextractor">
+      <cexextractor
+            class="com.collins.trustedmethods.agreedog.AgreeDog"
+            id="com.rockwellcollins.atc.agree.agreedog.cexextractor"
+            pluginName="com.rockwellcollins.atc.agree.agreedog">
+      </cexextractor>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.collins.trustedmethods.agreedog.preferences.AgreeDogPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="com.rockwellcollins.atc.agree.Agree"
+            class="com.collins.trustedmethods.agreedog.preferences.AgreeDogPreferencePage"
+            id="com.rockwellcollins.atc.agree.agreedog.preferences.AgreeDogPreferencePage"
+            name="AgreeDog">
+      </page>
+   </extension>
+
+</plugin>
