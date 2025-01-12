@@ -2,7 +2,7 @@
 <feature
       id="com.collins.trustedmethods.agreedog.feature"
       label="AgreeDog Plugin"
-      version="1.0.0.qualifier"
+      version="0.1.1.qualifier"
       provider-name="Collins Aerospace">
 
    <description url="https://github.com/loonwerks/AgreeDog-plugin">

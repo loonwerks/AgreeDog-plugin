@@ -24,5 +24,15 @@
             name="AgreeDog">
       </page>
    </extension>
-
+ 
+<extension
+         point="org.eclipse.ui.views">
+      <view
+            class="com.collins.trustedmethods.agreedog.BrowserView"
+            id="com.collins.trustedmethods.agreedog.BrowserView"
+            name="Browser"
+            restorable="true">
+      </view>
+   </extension> 
+   
 </plugin>

@@ -26,6 +26,8 @@ public class AgreeDogPreferencePage extends FieldEditorPreferencePage implements
 
 		addField(new StringFieldEditor(AgreeDogPreferenceConstants.PREF_OPEN_AI_KEY, "OpenAI Key",
 				getFieldEditorParent()));
+		addField(
+				new StringFieldEditor(AgreeDogPreferenceConstants.PREF_PORT, "Localhost Port", getFieldEditorParent()));
 
 	}
 

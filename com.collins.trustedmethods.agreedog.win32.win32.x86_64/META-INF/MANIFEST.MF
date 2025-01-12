@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AgreeDog Windows binary
 Bundle-SymbolicName: com.collins.trustedmethods.agreedog.win32.win32.x86_64;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.1.1.qualifier
 Eclipse-PlatformFilter: (& (osgi.os=win32) (osgi.ws=win32) (osgi.arch=x86_64) )
 Bundle-Vendor: Collins Aerospace
-Fragment-Host: com.collins.trustedmethods.agreedog;bundle-version="1.0.0"
+Fragment-Host: com.collins.trustedmethods.agreedog;bundle-version="0.1.1"
 Automatic-Module-Name: com.collins.trustedmethods.agreedog.win32.win32.x86.64
 Bundle-RequiredExecutionEnvironment: JavaSE-17

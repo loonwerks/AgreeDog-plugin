@@ -6,7 +6,7 @@
   <parent>
 	  <groupId>com.collins.trustedmethods.agreedog</groupId>
 	  <artifactId>com.collins.trustedmethods.agreedog.parent</artifactId>
-	  <version>0.0.1-SNAPSHOT</version>
+	  <version>0.1.1-SNAPSHOT</version>
   </parent>
   <artifactId>com.collins.trustedmethods.agreedog</artifactId>
   <packaging>eclipse-plugin</packaging>

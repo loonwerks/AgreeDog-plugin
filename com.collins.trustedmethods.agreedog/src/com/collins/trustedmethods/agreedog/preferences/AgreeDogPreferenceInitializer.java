@@ -11,6 +11,7 @@ public class AgreeDogPreferenceInitializer extends AbstractPreferenceInitializer
 	public void initializeDefaultPreferences() {
 		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(AgreeDogPreferenceConstants.PREF_OPEN_AI_KEY, "");
+		store.setDefault(AgreeDogPreferenceConstants.PREF_PORT, "50");
 	}
 
 }

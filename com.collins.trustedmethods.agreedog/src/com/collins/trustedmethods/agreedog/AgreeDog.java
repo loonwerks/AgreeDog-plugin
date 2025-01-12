@@ -35,12 +35,22 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
 import org.osate.aadl2.ComponentImplementation;
 import org.osate.ui.dialogs.Dialog;
 import org.osgi.framework.Bundle;
@@ -58,7 +68,7 @@ public class AgreeDog implements CexExtractor {
 		protected BufferedReader fromProcess;
 		protected BufferedWriter toProcess;
 
-		Runner() throws Exception {
+		Runner(IProgressMonitor monitor) throws Exception {
 			ProcessBuilder processBuilder = new ProcessBuilder(getArgs());
 			processBuilder.redirectErrorStream(true);
 			System.out.println(String.join(" ", processBuilder.command()));
@@ -73,12 +83,42 @@ public class AgreeDog implements CexExtractor {
 			addShutdownHook();
 			toProcess = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 			fromProcess = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//			String out;
-//			while ((out = fromProcess.readLine()) != null) {
-//				System.out.println(out);
-//				output = out;
-//			}
+			String out;
+			boolean browserStarted = false;
+			while ((out = fromProcess.readLine()) != null) {
+				System.out.println(out);
+				if (!browserStarted && out.contains("* Running on http")) {
+
+					Display.getDefault().asyncExec(() -> {
+						try {
+							PlatformUI.getWorkbench()
+									.getActiveWorkbenchWindow()
+									.getActivePage()
+									.showView(BrowserView.BROWSER_VIEW_ID);
+						} catch (PartInitException e) {
+							e.printStackTrace();
+						}
+					});
+
+					browserStarted = true;
+					break;
+//				} else if (browserStarted) {
+//					Thread.sleep(500);
+				} else if (monitor.isCanceled()) {
+					stop();
+					break;
+				}
+			}
 			process.waitFor();
+			Display.getDefault().asyncExec(() -> {
+				final IViewPart view = PlatformUI.getWorkbench()
+						.getActiveWorkbenchWindow()
+						.getActivePage()
+						.findView(BrowserView.BROWSER_VIEW_ID);
+				if (view != null) {
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(view);
+				}
+			});
 			System.out.println("Finished running AgreeDog.");
 
 		}
@@ -118,7 +158,9 @@ public class AgreeDog implements CexExtractor {
 
 	};
 
-	private final static String AGREE_DOG_EXEC = "AgreeDog";
+	IWebBrowser browser = null;
+
+	private final static String AGREE_DOG_EXEC = "INSPECTA_Dog";
 	private final static String CEX_FOLDER_NAME = "counterexamples";
 	private final static String CEX_FILE_EXT = ".txt";
 
@@ -141,6 +183,7 @@ public class AgreeDog implements CexExtractor {
 		result.add(openApiKey);
 		result.add("--counter-example");
 		result.add(counterExampleFile);
+//		result.add("--requirement-file");
 		result.add("--start-file");
 		result.add(startFile);
 
@@ -219,13 +262,25 @@ public class AgreeDog implements CexExtractor {
 		}
 
 		// Launch AgreeDog
-		try {
-			new Runner();
-		} catch (Exception e) {
-			Dialog.showError("AgreeDog", "Error running AgreeDog.");
-			e.printStackTrace();
-			return;
-		}
+		final WorkspaceJob job = new WorkspaceJob("AgreeDog") {
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) {
+				monitor.beginTask("AgreeDog", IProgressMonitor.UNKNOWN);
+
+				try {
+					new Runner(monitor);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
+
+		System.out.println("CEX explanation complete");
 	}
 
 	@Override
