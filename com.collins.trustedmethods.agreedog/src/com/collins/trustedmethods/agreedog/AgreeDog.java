@@ -148,6 +148,7 @@ public class AgreeDog implements CexExtractor {
 	private String openApiKey = "";
 	private String counterExampleFile = "";
 	private String startFile = "";
+	private String requirementFile = "";
 
 	public AgreeDog() {
 
@@ -159,11 +160,16 @@ public class AgreeDog implements CexExtractor {
 		result.add(getEntrypoint());
 		result.add("--working-dir");
 		result.add(workingDir);
-		result.add("--user-open-api-key");
-		result.add(openApiKey);
+		if (!openApiKey.isBlank()) {
+			result.add("--user-open-api-key");
+			result.add(openApiKey);
+		}
 		result.add("--counter-example");
 		result.add(counterExampleFile);
-//		result.add("--requirement-file");
+		if (!requirementFile.isBlank()) {
+			result.add("--requirement-file");
+			result.add(requirementFile);
+		}
 		result.add("--start-file");
 		result.add(startFile);
 
@@ -233,14 +239,20 @@ public class AgreeDog implements CexExtractor {
 		}
 
 		// Get file name containing component implementation
-		startFile = AgreeDogUtil.removeProjectName(compImpl.eResource().getURI().toPlatformString(true));
+//		startFile = AgreeDogUtil.removeProjectName(compImpl.eResource().getURI().toPlatformString(true));
+		startFile = workingDir + AgreeDogUtil.removeProjectName(compImpl.eResource().getURI().toPlatformString(true));
+
+		// Get system requirement file
+		requirementFile = Activator.getDefault()
+				.getPreferenceStore()
+				.getString(AgreeDogPreferenceConstants.PREF_SYS_REQ_FILENAME);
 
 		// Get server port
 		port = Activator.getDefault().getPreferenceStore().getString(AgreeDogPreferenceConstants.PREF_PORT);
-		if (port.isBlank()) {
-			Dialog.showError("AgreeDog", "Unable to launch AgreeDog.  Server port not set in preferences.");
-			return;
-		}
+//		if (port.isBlank()) {
+//			Dialog.showError("AgreeDog", "Unable to launch AgreeDog.  Server port not set in preferences.");
+//			return;
+//		}
 
 		// Refresh directory
 		try {
