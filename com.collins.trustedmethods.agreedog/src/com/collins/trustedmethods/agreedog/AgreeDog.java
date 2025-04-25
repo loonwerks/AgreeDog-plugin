@@ -26,11 +26,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -46,10 +46,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.osate.aadl2.ComponentImplementation;
 import org.osate.ui.dialogs.Dialog;
@@ -81,46 +77,28 @@ public class AgreeDog implements CexExtractor {
 				throw generalException;
 			}
 			addShutdownHook();
-			toProcess = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 			fromProcess = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String out;
-			boolean browserStarted = false;
 			while ((out = fromProcess.readLine()) != null) {
 				System.out.println(out);
-				if (!browserStarted && out.contains("* Running on http")) {
-
-					Display.getDefault().asyncExec(() -> {
-						try {
-							PlatformUI.getWorkbench()
-									.getActiveWorkbenchWindow()
-									.getActivePage()
-									.showView(BrowserView.BROWSER_VIEW_ID);
-						} catch (PartInitException e) {
-							e.printStackTrace();
-						}
-					});
-
-					browserStarted = true;
+				if (out.contains("* Running on http")) {
 					break;
-//				} else if (browserStarted) {
-//					Thread.sleep(500);
-				} else if (monitor.isCanceled()) {
-					stop();
+				} else {
+					Thread.sleep(1000);
+				}
+			}
+
+			while (!process.waitFor(10, TimeUnit.MILLISECONDS)) {
+				// process is still running
+				// check if the operation has been canceled
+				if (monitor.isCanceled()) {
 					break;
 				}
 			}
-			process.waitFor();
-			Display.getDefault().asyncExec(() -> {
-				final IViewPart view = PlatformUI.getWorkbench()
-						.getActiveWorkbenchWindow()
-						.getActivePage()
-						.findView(BrowserView.BROWSER_VIEW_ID);
-				if (view != null) {
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(view);
-				}
-			});
-			System.out.println("Finished running AgreeDog.");
 
+			System.out.println("Finished running AgreeDog.");
+			process.destroy();
+			monitor.done();
 		}
 
 		private final Thread shutdownHook = new Thread("shutdown-hook") {
@@ -163,7 +141,9 @@ public class AgreeDog implements CexExtractor {
 	private final static String AGREE_DOG_EXEC = "INSPECTA_Dog";
 	private final static String CEX_FOLDER_NAME = "counterexamples";
 	private final static String CEX_FILE_EXT = ".txt";
+	private final static String AGREE_DOG_SERVER_ADDR = "http://127.0.0.1";
 
+	private String port = "";
 	private String workingDir = "";
 	private String openApiKey = "";
 	private String counterExampleFile = "";
@@ -195,8 +175,8 @@ public class AgreeDog implements CexExtractor {
 		final Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID + "." + getFragmentExt());
 		try {
 			// Extract entire directory so DLLs are available on windows
-			URL dirUrl = FileLocator.toFileURL(bundle.getEntry("binaries"));
-			File exe = new File(dirUrl.getPath(), getExecutableName());
+			final URL dirUrl = FileLocator.toFileURL(bundle.getEntry("binaries"));
+			final File exe = new File(dirUrl.getPath(), getExecutableName());
 			exe.setExecutable(true);
 			return exe.getPath();
 		} catch (Exception e) {
@@ -205,7 +185,7 @@ public class AgreeDog implements CexExtractor {
 	}
 
 	@Override
-	public void receiveCex(ComponentImplementation compImpl, Property property, EObject agreePoperty,
+	public void receiveCex(ComponentImplementation compImpl, Property property, EObject agreeProperty,
 			Counterexample cex, Map<String, EObject> refMap) {
 
 		// Create cex folder (if it doesn't exist) to save cex to
@@ -240,7 +220,8 @@ public class AgreeDog implements CexExtractor {
 		}
 
 		// Create cex file name
-		uri = uri.appendSegment(AgreeDogUtil.getUniqueFileName(compImpl, CEX_FILE_EXT));
+//		uri = uri.appendSegment(AgreeDogUtil.getUniqueFileName(compImpl, CEX_FILE_EXT));
+		uri = uri.appendSegment(AgreeDogUtil.getCexFileName(compImpl, CEX_FILE_EXT));
 
 		// Write cex to file
 		final IFile cexFile = AgreeDogUtil.createFile(uri, cex.toString());
@@ -253,6 +234,13 @@ public class AgreeDog implements CexExtractor {
 
 		// Get file name containing component implementation
 		startFile = AgreeDogUtil.removeProjectName(compImpl.eResource().getURI().toPlatformString(true));
+
+		// Get server port
+		port = Activator.getDefault().getPreferenceStore().getString(AgreeDogPreferenceConstants.PREF_PORT);
+		if (port.isBlank()) {
+			Dialog.showError("AgreeDog", "Unable to launch AgreeDog.  Server port not set in preferences.");
+			return;
+		}
 
 		// Refresh directory
 		try {

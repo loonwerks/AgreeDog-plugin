@@ -56,6 +56,10 @@ public class AgreeDogUtil {
 		return timestamp + "_" + namedElement.getQualifiedName().replace("::", "_").replace(".", "_") + fileExtension;
 	}
 
+	public static String getCexFileName(NamedElement namedElement, String fileExtension) {
+		return namedElement.getName().replace("::", "_").replace(".", "_") + "_cex" + fileExtension;
+	}
+
 	public static IFile createFile(URI fileName, String contents) {
 		final IFile file = getRoot().getFile(new Path(fileName.toPlatformString(true)));
 		if (!writeFile(file, contents)) {

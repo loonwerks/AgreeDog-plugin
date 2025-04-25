@@ -31,7 +31,7 @@
         <module>com.collins.trustedmethods.agreedog.site</module>
     </modules>
 	
-<profiles>
+	<profiles>
 		<profile>
 			<id>macos</id>
 			<activation>
@@ -394,6 +394,16 @@
 			<url>${eclipse.mirror}/releases/${eclipse.version}</url>
 		</repository>
 		<repository>
+			<id>elk</id>
+			<layout>p2</layout>
+			<url>https://download.eclipse.org/elk/updates/nightly</url>
+		</repository>
+		<repository>
+			<id>yakindu</id>
+			<layout>p2</layout>
+			<url>http://updates.yakindu.com/statecharts/releases/3.5.9</url>
+		</repository>
+		<repository>
 			<id>Osate2</id>
 			<layout>p2</layout>
 			<url>https://osate-build.sei.cmu.edu/download/osate/stable/2.14.0-vfinal/updates/</url>
@@ -401,6 +411,17 @@
 		<repository>
 			<id>fmw-snapshots</id>
 			<url>https://raw.githubusercontent.com/loonwerks/formal-methods-workbench-updates/master/snapshots/</url>
+			<layout>p2</layout>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>agree-snapshots</id>
+			<url>https://raw.githubusercontent.com/loonwerks/agree-updates/master/snapshots/</url>
 			<layout>p2</layout>
 			<releases>
 				<enabled>false</enabled>
