@@ -207,11 +207,11 @@ public class AgreeDog implements CexExtractor {
 		openApiKey = Activator.getDefault()
 				.getPreferenceStore()
 				.getString(AgreeDogPreferenceConstants.PREF_OPEN_AI_KEY);
-		if (openApiKey.isBlank()) {
-			Dialog.showError("AgreeDog",
-					"An OpenAI API key is needed to use AgreeDog.  The key can be specified in the AgreeDog preferences.");
-			return;
-		}
+//		if (openApiKey.isBlank()) {
+//			Dialog.showError("AgreeDog",
+//					"An OpenAI API key is needed to use AgreeDog.  The key can be specified in the AgreeDog preferences.");
+//			return;
+//		}
 
 		// Create counterexamples folder if it doesn't exist
 		URI uri = URI.createPlatformResourceURI(project.getFullPath().toString(), true);
