@@ -40,7 +40,7 @@ public class AgreeDogPreferencePage extends FieldEditorPreferencePage implements
 				if (!getTextControl().getText().isEmpty()) {
 					dlgSelectFile.setFileName(getTextControl().getText());
 				}
-				dlgSelectFile.setFilterExtensions(new String[] { "*.txt", "*.*" });
+				dlgSelectFile.setFilterExtensions(new String[] { ".csv", "*.txt", "*.*" });
 				String fileName = dlgSelectFile.open();
 				if (fileName == null) {
 					return null;

@@ -31,6 +31,17 @@ public class AgreeDogUtil {
 		return null;
 	}
 
+	public static String getProjectRelativePath(Element element) {
+		try {
+			IFile file = getFile(element.eResource().getURI());
+			return "/" + file.getProjectRelativePath().removeLastSegments(1).toString();
+		} catch (Exception e) {
+
+		}
+
+		return null;
+	}
+
 	public static IFile getFile(URI f) {
 		final String pathString = f.isPlatform() ? f.toPlatformString(true) : f.toString();
 		return getRoot().getFile(new Path(pathString));

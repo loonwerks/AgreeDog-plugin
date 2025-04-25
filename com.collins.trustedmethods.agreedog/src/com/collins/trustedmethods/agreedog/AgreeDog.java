@@ -240,7 +240,8 @@ public class AgreeDog implements CexExtractor {
 
 		// Get file name containing component implementation
 //		startFile = AgreeDogUtil.removeProjectName(compImpl.eResource().getURI().toPlatformString(true));
-		startFile = workingDir + AgreeDogUtil.removeProjectName(compImpl.eResource().getURI().toPlatformString(true));
+		workingDir += AgreeDogUtil.getProjectRelativePath(compImpl);
+		startFile = compImpl.eResource().getURI().lastSegment();
 
 		// Get system requirement file
 		requirementFile = Activator.getDefault()
